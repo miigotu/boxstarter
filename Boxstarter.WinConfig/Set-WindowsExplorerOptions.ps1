@@ -69,6 +69,12 @@ Enables the showing of check boxes next to items in Windows Explorer for item se
 .PARAMETER DisableItemCheckBox
 Disables the showing of check boxes next to items in Windows Explorer for item selection.
 
+.PARAMETER EnableSingleClick
+Enables single click to open files in Windows Explorer
+
+.PARAMETER EnableDoubleClick
+Enables double click to open files in Windows Explorer
+
 .LINK
 https://boxstarter.org
 
@@ -97,7 +103,9 @@ https://boxstarter.org
         [switch]$EnableSnapAssist,
         [switch]$DisableSnapAssist,
         [switch]$EnableItemCheckBox,
-        [switch]$DisableItemCheckBox
+        [switch]$DisableItemCheckBox,
+        [switch]$EnableSingleClick.
+        [switch]$EnableDoubleClick
     )
 
     $PSBoundParameters.Keys | % {
@@ -105,6 +113,9 @@ https://boxstarter.org
         if($_-like "Dis*"){ $other="En" + $_.Substring(3)}
         if($PSBoundParameters[$_] -and $PSBoundParameters[$other]) {
             throw new-Object -TypeName ArgumentException "You may not set both $_ and $other. You can only set one."
+        }
+        if($EnableSingleClick -and $EnableDoubleClick) {
+            throw new-Object -TypeName ArgumentException "You may not set both EnableSingleClick and EnableDoubleClick. You can only set one."
         }
     }
 
@@ -121,6 +132,12 @@ https://boxstarter.org
 
         if($EnableShowFrequentFoldersInQuickAccess) {Set-ItemProperty $key ShowFrequent 1}
         if($DisableShowFrequentFoldersInQuickAccess) {Set-ItemProperty $key ShowFrequent 0}
+
+        if($EnableSingleClick) {
+            Set-ItemProperty $key IconUnderline 2
+            Set-ItemProperty %key ShellState 240000001ea8000000000000000000000000000001000000130000000000000062000000
+        }
+        if($EnableDoubleClick) {Set-ItemProperty $key ShellState 240000003ea8000000000000000000000000000001000000130000000000000062000000}
     }
 
     if(Test-Path -Path $advancedKey) {
